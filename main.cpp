@@ -2,15 +2,17 @@
 #include <list>
 #include <string>
 #include <iterator>
+#include "list.hpp"
 
 int main() {
-	std::list<int> lst;
-	lst.push_back(1);
-	lst.push_front(2);
-	std::list<int>::iterator it;
-	it = lst.begin();
-	std::cout << *it;
-	it++;
-	std::cout << *it;
-	
+	ft::list<int> lst;
+
+	lst.set_node(NULL);
+	lst.push_back(10);
+	lst.push_back(2);
+	lst.push_back(3);
+
+	std::cout << lst.node->get_value() << std::endl;
+	std::cout << lst.node->get_next()->get_value() << std::endl;
+	std::cout << lst.node->get_next()->get_next()->get_value() << std::endl;
 }
