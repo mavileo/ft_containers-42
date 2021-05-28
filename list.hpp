@@ -6,7 +6,7 @@
 /*   By: mavileo <mavileo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/26 17:35:11 by mavileo           #+#    #+#             */
-/*   Updated: 2021/05/28 16:46:02 by mavileo          ###   ########.fr       */
+/*   Updated: 2021/05/28 18:01:44 by mavileo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,32 +62,103 @@ namespace ft {
 	template <class T> class list {
 		
 		private :
-
+			Node<T> *_node;
+			size_t _size;
 
 		public :
-			Node<T> *node;
-			size_t _size;
 			typedef T value_type;
 
-			list() {}
+			list() {
+				_node = NULL;
+				_size = 0;
+			}
 			~list() {}
 
-			void set_node(Node<T> *n) {
-				node = n;
+			// ITERATORS
+			Node<T> *begin() {
+				return _node;
 			}
 
-			void push_back(T value) {
-				if (!node) {
+			// CAPACITY
+			bool empty() {
+				if (_size)
+					return false;
+				return true;
+			}
+			size_t size() {
+				return _size;
+			}
+			size_t max_size() {
+				return std::numeric_limits<size_t>::max() / (sizeof(value_type));
+			}			
+
+			// ELEMENT ACCESS
+			T front() {
+				return _node->get_value();
+			}
+			T back() {
+				return _node->get_prev()->get_value();
+			}
+
+			// MODIFIERS
+			void push_front(T value) {
+				if (!_node) {
 					Node<T> *n = new Node<T>(value, NULL, NULL);
 					n->set_prev(n);
 					n->set_next(n);
-					node = n;
+					_node = n;
 				}
 				else {
-					Node<T> *n = new Node<T>(value, node->get_prev(), node);
-					node->get_prev()->set_next(n);
-					node->set_prev(n);
+					Node<T> *n = new Node<T>(value, _node->get_prev(), _node);
+					_node->get_prev()->set_next(n);
+					_node->set_prev(n);
+					_node = n;
 				}
+				_size++;
 			}
+			void pop_front() {
+				if (!_node) {
+					return ;
+				} else if (_node == _node->get_prev()) {
+					delete _node;
+					_node = NULL;
+				} else {
+					_node->get_prev()->set_next(_node->get_next());
+					_node->get_next()->set_prev(_node->get_prev());
+					Node<T> *tmp = _node;
+					_node = _node->get_next();
+					delete tmp;
+				}
+				_size--;
+			}
+			void push_back(T value) {
+				if (!_node) {
+					Node<T> *n = new Node<T>(value, NULL, NULL);
+					n->set_prev(n);
+					n->set_next(n);
+					_node = n;
+				}
+				else {
+					Node<T> *n = new Node<T>(value, _node->get_prev(), _node);
+					_node->get_prev()->set_next(n);
+					_node->set_prev(n);
+				}
+				_size++;
+			}
+			void pop_back() {
+				if (!_node) {
+					return ;
+				} else if (_node == _node->get_prev()) {
+					delete _node;
+					_node = NULL;
+				} else {
+					Node<T> *tmp = _node->get_prev();
+					_node->get_prev()->get_prev()->set_next(_node);
+					_node->set_prev(_node->get_prev()->get_prev());
+					delete tmp;
+				}
+				_size--;
+			}
+
 	};
 }
