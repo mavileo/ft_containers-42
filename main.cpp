@@ -5,13 +5,13 @@
 #include "list.hpp"
 
 void	print_lst(ft::list<int> lst) {
-	Node<int> *tmp = lst.begin();
-	for (int i = 0; i < int(lst.size()); i++) {
-		std::cout << tmp->get_value();
-		tmp = tmp->get_next();
-		std::cout << std::endl;
+	ft::list<int>::iterator it = lst.begin();
+	size_t i = 0;
+	while (i++ < lst.size()) {
+		std::cout << *it << std::endl;
+		it++;
 	}
-	std::cout << std::endl;
+	std::cout << "\n";
 }
 
 int main() {
@@ -21,20 +21,10 @@ int main() {
 	lst.push_back(2);
 	lst.push_front(3);
 
-	std::cout << lst.front() << std::endl;
-	std::cout << lst.back() << std::endl << std::endl;
-
 	print_lst(lst);
 
-	lst.pop_front();
-	print_lst(lst);
-	
-	lst.pop_back();
-	print_lst(lst);
+	std::cout << "\n";
 
 	lst.pop_front();
-	print_lst(lst);
-	
-	lst.pop_back();
 	print_lst(lst);
 }
