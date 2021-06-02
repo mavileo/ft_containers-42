@@ -6,7 +6,7 @@
 /*   By: mavileo <mavileo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/26 17:35:11 by mavileo           #+#    #+#             */
-/*   Updated: 2021/06/02 19:41:17 by mavileo          ###   ########.fr       */
+/*   Updated: 2021/06/02 19:51:00 by mavileo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class Node {
 	public :
 	
 		Node() {
-			&value = NULL;
+			value = 0;
 			prev = NULL;
 			next = NULL;
 			last = true;
@@ -174,15 +174,6 @@ namespace ft {
 			size_t _size;
 			Node<T> *_last;
 
-			Node<T> *get_last() {
-				Node<T> *last = _node;
-				
-				while (last->get_next() != _last) {
-					last = last->get_next();
-				}
-				return last;
-			}
-
 		public :
 			typedef T												value_type;
 			typedef Alloc											allocator_type;
@@ -195,7 +186,7 @@ namespace ft {
 
 			typedef typename ft::list_iterator<T>					iterator;
 			//typedef typename ft::listConstIterator<T>				const_iterator;
-			//typedef typename ft::listReverseIterator<iterator>		reverse_iterator;
+			typedef typename ft::list_reverse_iterator<iterator>	reverse_iterator;
 			//typedef typename ft::listConstReverseIterator<iterator>	const_reverse_iterator;
 
 			// MEMBER FUNCS
@@ -240,7 +231,7 @@ namespace ft {
 				return _node->get_value();
 			}
 			value_type back() {
-				return get_last()->get_value();
+				return _last->get_prev()->get_value();
 			}
 
 			// MODIFIERS
