@@ -6,11 +6,12 @@
 /*   By: mavileo <mavileo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/26 17:35:11 by mavileo           #+#    #+#             */
-/*   Updated: 2021/06/02 19:51:00 by mavileo          ###   ########.fr       */
+/*   Updated: 2021/06/04 20:24:28 by mavileo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <memory>
+#include "reverse_iterator.hpp"
 
 template < class T >
 class Node {
@@ -60,8 +61,11 @@ class Node {
 		Node	*get_next() {
 			return next;
 		}
-		bool	*get_last() {
+		bool	get_last() {
 			return last;
+		}
+		Node	*get_ptr() {
+			return this;
 		}
 
 };
@@ -106,73 +110,26 @@ namespace ft {
 				return (tmp);
 			};
 
+			list_iterator operator =(value_type val)
+			{
+				ptr->set_value(val);
+				return this;
+			};
+
 			bool operator ==(list_iterator const& b) const { return (ptr == b.ptr); };
 			bool operator !=(list_iterator const& b) const { return (ptr != b.ptr); };
 
-			value_type operator *() { return (ptr->get_value()); };
-			const_reference operator *() const { return (*(ptr->get_value())); };								// *a
-			pointer operator ->() { return (ptr); };											// a->b
-			pointer operator ->() const { return (ptr); };	
+			value_type operator *() { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); };
+			const_reference operator *() const { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); };
+			pointer operator ->() { return (ptr); };
+			pointer operator ->() const { return (ptr); };
+
+			pointer get_ptr() { return ptr; };
 		private :
 			pointer ptr;
 	};
-
-	template < class T >
-	class list_reverse_iterator {
-		public :
-			typedef T						value_type;
-			typedef value_type&				reference;
-			typedef const value_type&		const_reference;
-			typedef Node<T>*				pointer;
-			typedef Node<T> const *			const_pointer;
-			typedef typename std::ptrdiff_t	difference_type;
-
-			list_reverse_iterator() {}
-			list_reverse_iterator(pointer p) {ptr = p;}
-			list_reverse_iterator &operator= (const list_reverse_iterator& cp)
-			{
-				if (&cp == this)
-					return (*this);
-				this->_node = cp._node;
-				return (*this);
-			}
-			~list_reverse_iterator() {}
-
-			list_reverse_iterator operator ++() { ptr = ptr->get_prev(); return (*this); };
-
-			list_reverse_iterator operator ++(int)
-			{
-				list_reverse_iterator tmp = *this;
-				--(*this);
-				return (tmp);
-			};
-
-			list_reverse_iterator operator --() { ptr = ptr->get_next(); return (*this); };
-
-			list_reverse_iterator operator --(int)
-			{
-				list_reverse_iterator tmp = *this;
-				++(*this);
-				return (tmp);
-			};
-
-			bool operator ==(list_reverse_iterator const& b) const { return (ptr == b.ptr); };
-			bool operator !=(list_reverse_iterator const& b) const { return (ptr != b.ptr); };
-
-			value_type operator *() { return (ptr->get_value()); };
-			const_reference operator *() const { return (*(ptr->get_value())); };								// *a
-			pointer operator ->() { return (ptr); };											// a->b
-			pointer operator ->() const { return (ptr); };	
-		private :
-			pointer ptr;
-	};
-
-	template < class T, class Alloc = std::allocator<T> > class list {
-
-		private :
-			Node<T> *_node;
-			size_t _size;
-			Node<T> *_last;
+	template < class T, class Alloc = std::allocator<T> >
+	class list {
 
 		public :
 			typedef T												value_type;
@@ -190,27 +147,52 @@ namespace ft {
 			//typedef typename ft::listConstReverseIterator<iterator>	const_reverse_iterator;
 
 			// MEMBER FUNCS
-			list() {
+			explicit list (const allocator_type& alloc = allocator_type()) {
+				(void)alloc;
 				_node = NULL;
 				_size = 0;
 				_last = new Node<T>();
 			}
+			explicit list (size_type n, const value_type& val = value_type(),
+                const allocator_type& alloc = allocator_type()) {
+				(void)alloc;
+				_node = NULL;
+				_size = 0;
+				_last = new Node<T>();
+				while (n--)
+					this->push_back(val);
+			}
+/*
+			template <class InputIterator>
+			list (InputIterator first, InputIterator last,
+				const allocator_type& alloc = allocator_type()) {
+				(void)alloc;
+				for (iterator it = first; it != last; it++)
+					this->push_back(*it);
+			};
+
+			list (const list& x) {
+				ft::list<T> new_list(x.begin(), x.start());
+				*this = new_list;
+			}
+ */
 			~list() {
-/* 				if (_node) {
-					while (_node != _last) {
-						_node = _node->get_next();
-						delete _node->get_prev();
-					}
-				}
-				delete _last;
- */			}
+				//this->clear();
+				//delete _last;
+			}
 
 			// ITERATORS
-			list_iterator<T> begin() {
-				return list_iterator<T>(_node);
+			iterator begin() {
+				return (_last->get_prev()) ? iterator(_node) : iterator(_last);
 			}
-			list_iterator<T> end() {
-				return list_iterator<T>(_last);
+			reverse_iterator rbegin() {
+				return (_last->get_prev()) ? reverse_iterator(_last->get_prev()) : iterator(_last);
+			}
+			iterator end() {
+				return iterator(_last);
+			}
+			reverse_iterator rend() {
+				return reverse_iterator(_last);
 			}
 
 			// CAPACITY
@@ -235,6 +217,21 @@ namespace ft {
 			}
 
 			// MODIFIERS
+			void assign(T value) {
+				if (!_node) {
+					Node<T> *n = new Node<T>(value, _last, _last, false);
+					_last->set_prev(n);
+					_last->set_next(n);
+					_node = n;
+				}
+				else {
+					Node<T> *n = new Node<T>(value, _last, _node, false);
+					_node->set_prev(n);
+					_last->set_next(n);
+					_node = n;
+				}
+				_size++;
+			}
 			void push_front(T value) {
 				if (!_node) {
 					Node<T> *n = new Node<T>(value, _last, _last, false);
@@ -294,5 +291,87 @@ namespace ft {
 				}
 				_size--;
 			}
+			iterator erase (iterator position)
+			{
+				iterator ret = position->get_next();
+				_pop_node(position);
+				return (ret);
+			};
+			iterator erase(iterator first, iterator last)
+			{
+				while (first != last)
+					erase(first++);
+				return (last);
+			};
+			void swap (list& x) {
+				Node<T> *n = _node;
+				size_t s = _size;
+				Node<T> *l = _last;
+				
+				_node = x._node;
+				_size = x._size;
+				_last = x._last;
+
+				x._node = n;
+				x._size = s;
+				x._last = l;
+			}
+			void resize (size_type n, value_type val = value_type()) {
+				if (_size < n)
+					while (_size < n)
+						this->push_back(val);
+				else
+					while (_size > n)
+						this->pop_back();
+			}
+			void clear() {
+				if (!_node) {
+					return ;
+				} else {
+					_node = _node->get_next();
+					while (_node != _last) {
+						delete _node->get_prev();
+						_node = _node->get_next();
+					}
+					delete _node->get_prev();
+					_node = NULL;
+					_last->set_prev(NULL);
+					_last->set_next(NULL);
+					_size = 0;
+				}
+			}
+
+		private :
+			Node<T> *_node;
+			size_t _size;
+			Node<T> *_last;
+
+			void _pop_node(int pos) {
+				int i = 0;
+				Node<T> *tmp = _node;
+				
+				if (pos < 0 || _size < 1 || pos > _size)
+					return ;
+				while (i++ < pos)
+					tmp = tmp->get_next();
+				if (tmp->get_prev() == _last && tmp->get_next() == _last)
+					return this->clear();
+				tmp->get_prev()->set_next(tmp->get_next());
+				tmp->get_next()->set_prev(tmp->get_prev());
+				delete tmp;
+				_size--;
+			}
+
+			void _pop_node(iterator it) {
+				if (it->get_ptr() == _node)
+					_node = _node->get_next();
+				if (it->get_prev() == _last && it->get_next() == _last)
+					return this->clear();
+				it->get_prev()->set_next(it->get_next());
+				it->get_next()->set_prev(it->get_prev());
+				delete it->get_ptr();
+				_size--;
+			}
+
 	};
 }
