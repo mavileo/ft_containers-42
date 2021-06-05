@@ -17,28 +17,6 @@ Capacity:
 max_size
 Return maximum size (public member function )
 
-Modifiers:
-assign
-Assign new content to container (public member function )
-emplace_front 
-Construct and insert element at beginning (public member function )
-push_front
-Insert element at beginning (public member function )
-pop_front
-Delete first element (public member function )
-emplace_back 
-Construct and insert element at the end (public member function )
-push_back
-Add element at the end (public member function )
-pop_back
-Delete last element (public member function )
-emplace 
-Construct and insert element (public member function )
-insert
-Insert elements (public member function )
-erase
-Erase elements (public member function )
-
 Operations:
 splice
 Transfer elements from list to list (public member function )
@@ -64,3 +42,6 @@ relational operators (list)
 Relational operators for list (function )
 swap (list)
 Exchanges the contents of two lists (function template )
+
+MODIFIER EN DEREFERENCE (*it = 8)
+it+1

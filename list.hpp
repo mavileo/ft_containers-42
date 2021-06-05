@@ -6,11 +6,12 @@
 /*   By: mavileo <mavileo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/26 17:35:11 by mavileo           #+#    #+#             */
-/*   Updated: 2021/06/04 20:24:28 by mavileo          ###   ########.fr       */
+/*   Updated: 2021/06/05 16:33:51 by mavileo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <memory>
+#include <unistd.h>
 #include "reverse_iterator.hpp"
 
 template < class T >
@@ -30,11 +31,11 @@ class Node {
 			last = true;
 		}
 
-		Node(T val, Node<T> *p, Node<T> *n, bool l) {
+		Node(T val, Node<T> *p, Node<T> *n) {
 			value = val;
 			prev = p;
 			next = n;
-			last = l;
+			last = false;
 		}
 
 		~Node() {}
@@ -92,37 +93,37 @@ namespace ft {
 			}
 			~list_iterator() {}
 
-			list_iterator operator ++() { ptr = ptr->get_next(); return (*this); };
+			list_iterator operator ++() { ptr = ptr->get_next(); return (*this); }
 
 			list_iterator operator ++(int)
 			{
 				list_iterator tmp = *this;
 				++(*this);
 				return (tmp);
-			};
+			}
 
-			list_iterator operator --() { ptr = ptr->get_prev(); return (*this); };
+			list_iterator operator --() { ptr = ptr->get_prev(); return (*this); }
 
 			list_iterator operator --(int)
 			{
 				list_iterator tmp = *this;
 				--(*this);
 				return (tmp);
-			};
+			}
 
 			list_iterator operator =(value_type val)
 			{
 				ptr->set_value(val);
 				return this;
-			};
+			}
 
-			bool operator ==(list_iterator const& b) const { return (ptr == b.ptr); };
-			bool operator !=(list_iterator const& b) const { return (ptr != b.ptr); };
+			bool operator ==(list_iterator const& b) const { return (ptr == b.ptr); }
+			bool operator !=(list_iterator const& b) const { return (ptr != b.ptr); }
 
-			value_type operator *() { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); };
-			const_reference operator *() const { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); };
-			pointer operator ->() { return (ptr); };
-			pointer operator ->() const { return (ptr); };
+			value_type operator *() { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); }
+			const_reference operator *() const { return (ptr->get_last()) ? ptr->get_next()->get_value() : ptr->get_value(); }
+			pointer operator ->() { return (ptr); }
+			pointer operator ->() const { return (ptr); }
 
 			pointer get_ptr() { return ptr; };
 		private :
@@ -217,30 +218,26 @@ namespace ft {
 			}
 
 			// MODIFIERS
-			void assign(T value) {
-				if (!_node) {
-					Node<T> *n = new Node<T>(value, _last, _last, false);
-					_last->set_prev(n);
-					_last->set_next(n);
-					_node = n;
-				}
-				else {
-					Node<T> *n = new Node<T>(value, _last, _node, false);
-					_node->set_prev(n);
-					_last->set_next(n);
-					_node = n;
-				}
-				_size++;
+			void assign (size_type n, const value_type& val) {
+				this->clear();
+				while (n--)
+					push_back(val);
+			}
+			template <class InputIterator>
+			void assign (InputIterator first, InputIterator last) {
+				this->clear();
+				while (first != last)
+					push_back((first++)->get_value());
 			}
 			void push_front(T value) {
 				if (!_node) {
-					Node<T> *n = new Node<T>(value, _last, _last, false);
+					Node<T> *n = new Node<T>(value, _last, _last);
 					_last->set_prev(n);
 					_last->set_next(n);
 					_node = n;
 				}
 				else {
-					Node<T> *n = new Node<T>(value, _last, _node, false);
+					Node<T> *n = new Node<T>(value, _last, _node);
 					_node->set_prev(n);
 					_last->set_next(n);
 					_node = n;
@@ -264,14 +261,14 @@ namespace ft {
 			}
 			void push_back(T value) {
 				if (!_node) {
-					Node<T> *n = new Node<T>(value, _last, _last, false);
+					Node<T> *n = new Node<T>(value, _last, _last);
 					_last->set_prev(n);
 					_last->set_next(n);
 					_node = n;
 				}
 				else {
 					Node<T> *last = _last->get_prev();
-					Node<T> *n = new Node<T>(value, last, _last, false);
+					Node<T> *n = new Node<T>(value, last, _last);
 					last->set_next(n);
 					_last->set_prev(n);
 				}
@@ -291,18 +288,33 @@ namespace ft {
 				}
 				_size--;
 			}
-			iterator erase (iterator position)
-			{
+			iterator insert (iterator position, const value_type& val) {
+				_push_node(position, val);
+				return position->get_prev();
+			}
+			void insert (iterator position, size_type n, const value_type& val) {
+				
+				while (n--)
+					_push_node(position, val);
+			}
+			template <class InputIterator>
+			void insert (iterator position, InputIterator first, InputIterator last) {
+				while (first != last) {
+					value_type val = first->get_value();
+					insert(position, val);
+					first++;
+				}
+			}
+			iterator erase (iterator position) {
 				iterator ret = position->get_next();
 				_pop_node(position);
 				return (ret);
-			};
-			iterator erase(iterator first, iterator last)
-			{
+			}
+			iterator erase(iterator first, iterator last) {
 				while (first != last)
 					erase(first++);
 				return (last);
-			};
+			}
 			void swap (list& x) {
 				Node<T> *n = _node;
 				size_t s = _size;
@@ -341,6 +353,114 @@ namespace ft {
 				}
 			}
 
+			// OPERATIONS
+			void splice (iterator position, list& x) {
+				iterator beg = x.begin();
+				
+				while (beg != x.end())
+					_push_node(position, (beg++)->get_value());
+				x.clear();
+			}
+			void splice (iterator position, list& x, iterator i) {
+				(void)x;
+				i->get_next()->set_prev(i->get_prev());
+				i->get_prev()->set_next(i->get_next());
+				_push_node(position, i->get_value());
+				//delete i->get_ptr();
+			}
+			void splice (iterator position, list& x, iterator first, iterator last) {
+				(void)x;
+				if (first == x.begin() && last == x.end())
+					return splice(position, x);
+				while (first != last) {
+					first->get_next()->set_prev(first->get_prev());
+					first->get_prev()->set_next(first->get_next());
+					_push_node(position, first->get_value());
+					first++;
+					//delete first->get_prev();
+				}
+			}
+			void remove (const value_type& val) {
+				iterator it = begin();
+
+				while (it != end()) {
+					if (it->get_value() == val)
+						_pop_node(it);
+					it++;
+				}
+			}
+			template <class Predicate>
+			void remove_if (Predicate pred) {
+				iterator it = begin();
+
+				while (it != end()) {
+					if (pred(*it))
+						_pop_node(it);
+					it++;
+				}
+			}
+			void merge (list& x) {
+				splice(_last->get_prev(), x);
+				sort();
+			}
+			template <class Compare>
+			void merge (list& x, Compare comp) {
+				splice(_last->get_prev(), x);
+				sort(comp);
+			}
+			void unique() {
+				iterator it = begin();
+				it++;
+
+				while (it != end()) {
+					if (it->get_value() == it->get_prev()->get_value())
+						_pop_node(it);
+					it++;
+				}
+			}
+			template <class BinaryPredicate>
+			void unique (BinaryPredicate binary_pred) {
+				iterator it = begin();
+				it++;
+
+				while (it != end()) {
+					if (binary_pred(it->get_value(), it->get_prev()->get_value()))
+						_pop_node(it);
+					it++;
+				}
+			}
+			void sort() {
+				iterator it = begin();
+
+				while (++it != end()) {
+					if (it->get_value() < it->get_prev()->get_value()) {
+						_swap_nodes(it->get_prev(), it);
+						sort();
+					}
+				}
+			}
+			template <class Compare>
+			void sort (Compare comp) {
+				iterator it = begin();
+
+				while (++it != end()) {
+					if (!comp(it->get_prev()->get_value(), it->get_value())) {
+						_swap_nodes(it->get_prev(), it);
+						sort();
+					}
+				}
+			}
+			void reverse() {
+				size_t i = 0;
+				
+				while (i < _size / 2) {
+					iterator it = _get_it(i);
+					iterator it2 = _get_it(_size - i - 1);
+					_swap_nodes(it, it2);
+					i++;
+				}
+			}
+
 		private :
 			Node<T> *_node;
 			size_t _size;
@@ -361,9 +481,8 @@ namespace ft {
 				delete tmp;
 				_size--;
 			}
-
 			void _pop_node(iterator it) {
-				if (it->get_ptr() == _node)
+				if (it->get_ptr() == _node && it->get_next() != _last)
 					_node = _node->get_next();
 				if (it->get_prev() == _last && it->get_next() == _last)
 					return this->clear();
@@ -371,6 +490,62 @@ namespace ft {
 				it->get_next()->set_prev(it->get_prev());
 				delete it->get_ptr();
 				_size--;
+			}
+			void _push_node(iterator it, const value_type& val) {
+				Node<T> *tmp = new Node<T>(val, it->get_prev(), it->get_ptr());
+				it->get_prev()->set_next(tmp);
+				it->set_prev(tmp);
+				_node = _last->get_next();
+				_size++;
+			}
+			// it should be before it2 in the list
+			void _swap_nodes(iterator it, iterator it2) {
+				Node<T> *it_addr = it->get_ptr();
+				Node<T> *tmp = new Node<T>(it->get_value(), it->get_prev(), it->get_next());
+
+				if (_node == it->get_ptr())
+					_node = it2->get_ptr();
+				if (it->get_next() == it2->get_ptr()) {
+					it->get_prev()->set_next(it2->get_ptr());
+					
+					it2->get_next()->set_prev(it_addr);
+					
+					it->set_prev(it2->get_ptr());
+					it->set_next(it2->get_next());
+					
+					it2->set_next(it->get_ptr());
+					it2->set_prev(tmp->get_prev());
+				} else {
+					it->get_prev()->set_next(it2->get_ptr());
+					it->get_next()->set_prev(it2->get_ptr());
+					
+					it2->get_prev()->set_next(it_addr);
+					it2->get_next()->set_prev(it_addr);
+					
+					it->set_prev(it2->get_prev());
+					it->set_next(it2->get_next());
+					
+					it2->set_next(tmp->get_next());
+					it2->set_prev(tmp->get_prev());
+				}
+			}
+			iterator _get_it(size_t pos) {
+				iterator it = begin();
+				size_t i = 0;
+				
+				while (i < _size && i < pos) {
+					it++;
+					i++;
+				}
+				return it;
+			}
+			void	print_lst() {
+				ft::list<int>::iterator it = begin();
+				while (it != end()) {
+					std::cout << *it << std::endl;
+					it++;
+				}
+				std::cout << "\n";
 			}
 
 	};
