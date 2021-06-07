@@ -37,25 +37,22 @@ bool equal(int a, int b) {
 };
 
 int main() {
+	size_t s = 2;
+	int i = 1;
+
  	ft::list<int> lst;
- 	ft::list<int> lst2;
- 	
-	lst.push_back(1);
-	lst.push_back(10);
-	lst.push_back(2);
-	lst.push_back(7);
-	lst.push_back(3);
-	lst2.push_back(6);
-	lst2.push_back(9);
-	lst2.push_back(8);
-	lst2.push_back(4);
+ 	ft::list<int> lst2(s, i);
+ 	ft::list<int> lst3(lst2.begin(), lst2.end());
+
+	lst.push_back(i);
+	lst.push_back(i);
+	lst.push_back(i);
 	print_lst(lst);
 	print_lst(lst2);
+	print_lst(lst3);
+	
+	std::cout << (lst2 >= lst3);
 
-	lst.merge(lst2, equal);
-
-	print_lst(lst);
-	print_lst(lst2);
 
 /*	print_lst(lst);
 	*it = 99;
