@@ -2,7 +2,7 @@
 #include <list>
 #include <string>
 #include <iterator>
-#include "queue.hpp"
+#include "stack.hpp"
 
 void	print_lst(ft::list<int> lst) {
 	ft::list<int>::iterator it = lst.begin();
@@ -37,18 +37,16 @@ bool equal(int a, int b) {
 };
 
 int main() {
- 	ft::queue<int> queue;
+ 	ft::stack<int> stack;
 
-	queue.push(1);
-	queue.push(2);
-	queue.push(3);
+	stack.push(1);
+	stack.push(2);
+	stack.push(3);
 	
-	std::cout << queue.front() << std::endl;
-	std::cout << queue.back() << std::endl;
+	std::cout << stack.top() << std::endl;
+	stack.pop();
+	stack.top() += 2;
+	std::cout << stack.top() << std::endl;
 
-	queue.front() += queue.back();
-
-	std::cout << queue.front() << std::endl;
-	std::cout << queue.back() << std::endl;
 	std::cout << std::endl;
 }
