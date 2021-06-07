@@ -2,7 +2,7 @@
 #include <list>
 #include <string>
 #include <iterator>
-#include "list.hpp"
+#include "queue.hpp"
 
 void	print_lst(ft::list<int> lst) {
 	ft::list<int>::iterator it = lst.begin();
@@ -37,26 +37,18 @@ bool equal(int a, int b) {
 };
 
 int main() {
-	size_t s = 2;
-	int i = 1;
+ 	ft::queue<int> queue;
 
- 	ft::list<int> lst;
- 	ft::list<int> lst2(s, i);
- 	ft::list<int> lst3(lst2.begin(), lst2.end());
-
-	lst.push_back(i);
-	lst.push_back(i);
-	lst.push_back(i);
-	print_lst(lst);
-	print_lst(lst2);
-	print_lst(lst3);
+	queue.push(1);
+	queue.push(2);
+	queue.push(3);
 	
-	std::cout << (lst2 >= lst3);
+	std::cout << queue.front() << std::endl;
+	std::cout << queue.back() << std::endl;
 
+	queue.front() += queue.back();
 
-/*	print_lst(lst);
-	*it = 99;
-	std::cout << *it << std::endl;
+	std::cout << queue.front() << std::endl;
+	std::cout << queue.back() << std::endl;
 	std::cout << std::endl;
- */	
 }

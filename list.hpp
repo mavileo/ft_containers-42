@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   list.hpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mavileo <mavileo@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/05/26 17:35:11 by mavileo           #+#    #+#             */
-/*   Updated: 2021/06/07 11:37:33 by mavileo          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <memory>
 #include <unistd.h>
 #include "reverse_iterator.hpp"
@@ -53,7 +41,7 @@ class Node {
 			last = l;
 		}
 
-		T	get_value() {
+		T	&get_value() {
 			return value;
 		}
 		Node	*get_prev() {
@@ -192,19 +180,19 @@ namespace ft {
 	class list {
 
 		public :
-			typedef T												value_type;
-			typedef Alloc											allocator_type;
-			typedef typename std::size_t							size_type;
-			typedef typename std::ptrdiff_t							difference_type;
-			typedef typename allocator_type::pointer				pointer;
-			typedef typename allocator_type::const_pointer			const_pointer;
-			typedef typename allocator_type::reference				reference;
-			typedef typename allocator_type::const_reference		const_reference;
+			typedef T													value_type;
+			typedef Alloc												allocator_type;
+			typedef typename std::size_t								size_type;
+			typedef typename std::ptrdiff_t								difference_type;
+			typedef typename allocator_type::pointer					pointer;
+			typedef typename allocator_type::const_pointer				const_pointer;
+			typedef typename allocator_type::reference					reference;
+			typedef typename allocator_type::const_reference			const_reference;
 
-			typedef typename ft::list_iterator<T>					iterator;
-			typedef typename ft::list_const_iterator<T>				const_iterator;
-			typedef typename ft::list_reverse_iterator<iterator>	reverse_iterator;
-			//typedef typename ft::listConstReverseIterator<iterator>	const_reverse_iterator;
+			typedef typename ft::list_iterator<T>						iterator;
+			typedef typename ft::list_const_iterator<T>					const_iterator;
+			typedef typename ft::list_reverse_iterator<iterator>		reverse_iterator;
+			typedef typename ft::list_const_reverse_iterator<iterator>	const_reverse_iterator;
 
 			// MEMBER FUNCS
 			explicit list (const allocator_type& alloc = allocator_type()) {
@@ -257,6 +245,7 @@ namespace ft {
 					this->push_back(*first);
 					first++;
 				}
+				return *this;
 			}
 
 			~list() {
@@ -274,6 +263,9 @@ namespace ft {
 			reverse_iterator rbegin() {
 				return (_last->get_prev()) ? reverse_iterator(_last->get_prev()) : iterator(_last);
 			}
+			const_reverse_iterator rbegin() const { 
+				return (_last->get_prev()) ? const_reverse_iterator(_node) : const_reverse_iterator(_last);
+			}
 			iterator end() {
 				return iterator(_last);
 			}
@@ -282,6 +274,9 @@ namespace ft {
 			}
 			reverse_iterator rend() {
 				return reverse_iterator(_last);
+			}
+			const_reverse_iterator rend() const {
+				return const_reverse_iterator(_last);
 			}
 
 			// CAPACITY
@@ -298,10 +293,10 @@ namespace ft {
 			}			
 
 			// ELEMENT ACCESS
-			value_type front() {
+			reference front() {
 				return _node->get_value();
 			}
-			value_type back() {
+			reference back() {
 				return _last->get_prev()->get_value();
 			}
 
