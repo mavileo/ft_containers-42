@@ -20,8 +20,7 @@ int main() {
 	map.insert(std::pair<std::string, int>("a", 1));
 	map.insert(std::pair<std::string, int>("zfhrstj", 6));
 
-	ft::map<std::string, int>::reverse_iterator it = map.rbegin();
-
+	ft::map<std::string, int>::const_reverse_iterator it = map.rbegin();
 
 	while (it != map.rend()){
 		std::cout << (it)->second << std::endl;

@@ -196,6 +196,83 @@ namespace ft {
 	};
 
 
+	template < class Key, class T >
+	class map_const_iterator {
+		public :
+			typedef Key								key_type;
+			typedef T								mapped_type;
+			typedef std::pair<Key, T>				value_type;
+			typedef typename std::size_t 			size_type;
+			typedef typename std::ptrdiff_t 		difference_type;
+			typedef map_node<Key, T>				node;
+			typedef node*							node_point;
+			typedef value_type *					pointer;
+			typedef pointer							const_pointer;
+			typedef value_type &					reference;
+			typedef reference						const_reference;
+
+			map_const_iterator() {}
+			map_const_iterator(node_point p) {_ptr = p;}
+			map_const_iterator(node_point r, node_point p) {_root = r; _ptr = p;}
+			map_const_iterator &operator= (const map_const_iterator& cp) {
+				if (&cp == this)
+					return (*this);
+				this->_ptr = cp._ptr;
+				return (*this);
+			}
+			~map_const_iterator() {}
+
+			map_const_iterator operator ++() { _ptr = _ptr->get_next(_ptr); return (*this); }
+
+			map_const_iterator operator ++(int) {
+				map_const_iterator tmp = *this;
+				++(*this);
+				return (tmp);
+			}
+
+			map_const_iterator operator --() { 
+				if (!_ptr) {
+					_ptr = _root->get_last(_root);
+					return (*this);
+				}
+				node_point tmp = _root;
+				node_point prev = NULL;
+				while (tmp && tmp->get_val() != _ptr->get_val()) {
+					prev = tmp;
+					tmp = tmp->get_next(tmp);
+				}
+				_ptr = prev;
+				return (*this);
+			}
+
+			map_const_iterator operator --(int)
+			{
+				map_const_iterator tmp = *this;
+				--(*this);
+				return (tmp);
+			}
+
+			map_const_iterator operator =(value_type val)
+			{
+				_ptr->set_val(val);
+				return this;
+			}
+
+			bool operator ==(map_const_iterator const& b) const { return (_ptr == b._ptr); }
+			bool operator !=(map_const_iterator const& b) const { return (_ptr != b._ptr); }
+
+			const_reference operator *() const { return _ptr->get_pair(); }
+			const_pointer operator ->() const { return (&(_ptr->get_pair())); }
+
+			node_point get__ptr() { return _ptr; };
+
+
+		private :
+			node_point _root;
+			node_point _ptr;
+	};
+
+
 	template < class iterator >
 	class map_reverse_iterator {
 		public :
@@ -282,6 +359,90 @@ namespace ft {
 	};
 
 
+	template < class iterator >
+	class map_const_reverse_iterator {
+		public :
+			typedef typename iterator::mapped_type 		mapped_type;
+			typedef typename iterator::value_type		value_type;
+			typedef typename iterator::size_type		size_type;
+			typedef typename iterator::difference_type	difference_type;
+			typedef typename iterator::node				node;
+			typedef typename iterator::node_point			node_point;
+			typedef typename iterator::pointer			pointer;
+			typedef typename iterator::const_pointer	const_pointer;
+			typedef typename iterator::reference		reference;
+			typedef typename iterator::const_reference	const_reference;
+
+			map_const_reverse_iterator() {}
+			map_const_reverse_iterator(node_point p) {_ptr = p;}
+			map_const_reverse_iterator(node_point r, node_point p) {_root = r; _ptr = p;}
+			map_const_reverse_iterator(node_point r, node_point p, node_point f) {_root = r; _ptr = p;; _first = f;}
+			map_const_reverse_iterator &operator= (const map_const_reverse_iterator& cp) {
+				if (&cp == this)
+					return (*this);
+				this->_ptr = cp._ptr;
+				return (*this);
+			}
+			~map_const_reverse_iterator() {}
+
+			map_const_reverse_iterator operator --() { _ptr = _ptr->get_next(_ptr); return (*this); }
+
+			map_const_reverse_iterator operator ++(int) {
+				map_const_reverse_iterator tmp = *this;
+				++(*this);
+				return (tmp);
+			}
+
+			map_const_reverse_iterator operator ++() { 
+				if (!_ptr) {
+					_ptr = _ptr->get_last(_root);
+					return (*this);
+				}
+				if (_ptr == _first) {
+					_ptr = NULL;
+					return (*this);
+				}
+				if (_ptr == _root->get_first(_root)) {
+					_ptr = _first;
+					return (*this);
+				}
+				node_point tmp = _root->get_first(_root);
+				node_point prev = _first;
+				while (tmp && tmp->get_key() != _ptr->get_key()) {
+					prev = tmp;
+					tmp = tmp->get_next(tmp);
+				}
+				_ptr = prev;
+				return (*this);
+			}
+
+			map_const_reverse_iterator operator --(int)
+			{
+				map_const_reverse_iterator tmp = *this;
+				--(*this);
+				return (tmp);
+			}
+
+			map_const_reverse_iterator operator =(value_type val)
+			{
+				_ptr->set_val(val);
+				return this;
+			}
+
+			bool operator ==(map_const_reverse_iterator const& b) const { return (_ptr == b._ptr); }
+			bool operator !=(map_const_reverse_iterator const& b) const { return (_ptr != b._ptr); }
+
+			const_reference operator *() const { return _ptr->get_pair(); }
+			const_pointer operator ->() const { return (&(_ptr->get_pair())); }
+
+
+		private :
+			node_point _first;
+			node_point _root;
+			node_point _ptr;
+	};
+
+
 	template < class Key,                          //map::key_type
 	class T,                                       // map::mapped_type
 	class Compare = std::less<Key>,                     // map::key_compare
@@ -301,9 +462,9 @@ namespace ft {
 			typedef typename Alloc::pointer											pointer;
 			typedef typename Alloc::const_pointer									const_pointer;
 			typedef typename ft::map_iterator<key_type, mapped_type>				iterator;
-			//typedef typename ft::map_const_iterator<key_type, mapped_type>			const_iterator;
+			typedef typename ft::map_const_iterator<key_type, mapped_type>			const_iterator;
 			typedef typename ft::map_reverse_iterator<iterator>						reverse_iterator;
-			//typedef typename ft::map_const_reverse_iterator<iterator>		const_reverse_iterator;
+			typedef typename ft::map_const_reverse_iterator<iterator>				const_reverse_iterator;
 
 			//typedef Compare												value_compare;
 
@@ -322,19 +483,27 @@ namespace ft {
 
 			iterator begin() { return _node ? iterator(_node, _get_first(_node)) : iterator(_node, NULL); }
 
-			//const_iterator begin() const { return _node ? const_iterator(_node, _get_first(_node)) : const_iterator(_node, NULL); }
+			const_iterator begin() const { return _node ? const_iterator(_node, _get_first(_node)) : const_iterator(_node, NULL); }
 
 			iterator end() { return iterator(_node, NULL); }
 
-			//const_iterator end() const { return const_iterator(_node, NULL); }
+			const_iterator end() const { return const_iterator(_node, NULL); }
 
 			reverse_iterator rbegin() { return reverse_iterator(_node, _get_last(), _first); }
 
+			const_reverse_iterator rbegin() const { return const_reverse_iterator(_node, _get_last(), _first); }
+
 			reverse_iterator rend() { return reverse_iterator(_node, _first, _first); }
+
+			const_reverse_iterator rend() const { return const_reverse_iterator(_node, _first, _first); }
 
 			// CAPACITY
 
+			bool empty() const { return (_size) ? false : true;}
+
 			size_type size() { return _size; }
+
+			size_type max_size() const { return (std::numeric_limits<size_type>::max() / (sizeof(value_type))); }
 
 
 			// ELEMENT ACCESS
@@ -385,13 +554,6 @@ namespace ft {
 			node_point		_first;
 			node_point		_node;
 
-			node_point	_get_first(node_point root) {
-				if (!root)
-					return NULL;
-				return _get_left_most(root);
-			}
-
-
 		private :
 
 			key_compare		_comp;
@@ -414,6 +576,24 @@ namespace ft {
 				return root;
 			}
 
+			const node_point	_get_left_most(node_point root) const {
+				while (root->get_left() && root->get_left() != _first)
+					root = root->get_left();
+				return root;
+			}
+
+			node_point	_get_first(node_point root) {
+				if (!root)
+					return NULL;
+				return _get_left_most(root);
+			}
+
+			const node_point	_get_first(node_point root) const {
+				if (!root)
+					return NULL;
+				return _get_left_most(root);
+			}
+
 			node_point	_get_next(node_point root) {
 				if (root->get_right())
 					return _get_left_most(root->get_right());
@@ -424,7 +604,28 @@ namespace ft {
 				}
 			}
 
+			const node_point	_get_next(node_point root) const {
+				if (root->get_right())
+					return _get_left_most(root->get_right());
+				else {
+					while (root->get_top() && root == root->get_top()->get_right())
+						root = root->get_top();
+					return root->get_top();
+				}
+			}
+
 			node_point	_get_last() {
+				node_point n = _get_first(_node);
+				node_point prev = NULL;
+
+				while (n) {
+					prev = n;
+					n = _get_next(n);
+				}
+				return prev;
+			}
+
+			const node_point	_get_last() const {
 				node_point n = _get_first(_node);
 				node_point prev = NULL;
 
