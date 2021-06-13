@@ -8,14 +8,22 @@ namespace ft {
 		public:
 
 			typedef map_node<Key, T>		node;
-			typedef node *					node_ptr;
-			typedef const node *			const_node_ptr;
+			typedef node *					node_point;
+			typedef const node *			const_node_point;
 			typedef std::pair<Key, T>		value_type;
 
 			map_node() {
 				_top = NULL;
 				_left = NULL;
 				_right = NULL;
+				_is_first = false;
+			}
+
+			map_node(bool f) {
+				_top = NULL;
+				_left = NULL;
+				_right = NULL;
+				_is_first = f;
 			}
 
 			map_node(value_type const &pair) {
@@ -23,13 +31,15 @@ namespace ft {
 				_top = NULL;
 				_left = NULL;
 				_right = NULL;
+				_is_first = false;
 			}
 
-			map_node(value_type const &pair, node_ptr top) {
+			map_node(value_type const &pair, node_point top) {
 				_keyval = pair;
 				_top = top;
 				_left = NULL;
 				_right = NULL;
+				_is_first = false;
 			}
 
 			map_node(map_node const &src) { *this = src; }
@@ -44,14 +54,14 @@ namespace ft {
 
 			virtual ~map_node() {}
 
-			void	set_top(const node_ptr node)	{ _top = node; };
-			void	set_left(const node_ptr node)	{ _left = node; };
-			void	set_right(const node_ptr node)	{ _right = node; };
+			void	set_top(const node_point node)	{ _top = node; };
+			void	set_left(const node_point node)	{ _left = node; };
+			void	set_right(const node_point node)	{ _right = node; };
 
-			const_node_ptr	get_curr(void) const  { return (this); };
-			node_ptr		get_top(void) const   { return (_top); };
-			node_ptr		get_left(void) const  { return (_left); };
-			node_ptr		get_right(void) const { return (_right); };
+			const_node_point	get_curr(void) const  { return (this); };
+			node_point		get_top(void) const   { return (_top); };
+			node_point		get_left(void) const  { return (_left); };
+			node_point		get_right(void) const { return (_right); };
 
 			void	set_key(const Key &key)		{ _keyval.first = key; };
 			void	set_val(const T &val)		{ _keyval.second = val; };
@@ -61,21 +71,22 @@ namespace ft {
 			Key const	&get_key(void) const { return (_keyval.first); };
 			T			&get_val(void) { return (_keyval.second); };
 			value_type	&get_pair(void) { return (_keyval); };
+			bool		get_first(void) { return (_is_first); };
 			//pair const	get_pair(void) const { return (_keyval); };
 
-			node_ptr	get_left_most(node_ptr root) {
-				while (root->get_left())
+			node_point	get_left_most(node_point root) {
+				while (root->get_left() && !root->get_left()->get_first())
 					root = root->get_left();
 				return root;
 			}
 
-			node_ptr	get_first(node_ptr root) {
+			node_point	get_first(node_point root) {
 				if (!root)
 					return NULL;
 				return get_left_most(root);
 			}
 
-			node_ptr	get_next(node_ptr root) {
+			node_point	get_next(node_point root) {
 				if (root->get_right())
 					return get_left_most(root->get_right());
 				else {
@@ -85,9 +96,9 @@ namespace ft {
 				}
 			}
 
-			node_ptr	get_last(node_ptr root) {
-				node_ptr n = get_first(root);
-				node_ptr prev = NULL;
+			node_point	get_last(node_point root) {
+				node_point n = get_first(root);
+				node_point prev = NULL;
 
 				while (n) {
 					prev = n;
@@ -100,9 +111,10 @@ namespace ft {
 		private:
 
 			value_type	_keyval;
-			node_ptr	_top;
-			node_ptr	_left;
-			node_ptr	_right;
+			node_point	_top;
+			node_point	_left;
+			node_point	_right;
+			bool		_is_first;
 	};
 
 	template < class Key, class T >
@@ -114,23 +126,24 @@ namespace ft {
 			typedef typename std::size_t 					size_type;
 			typedef typename std::ptrdiff_t 				difference_type;
 			typedef map_node<Key, T>						node;
-			typedef node*									node_ptr;
+			typedef node*									node_point;
 			typedef value_type *							pointer;
+			typedef pointer									const_pointer;
 			typedef value_type &							reference;
 			typedef reference								const_reference;
 
 			map_iterator() {}
-			map_iterator(node_ptr p) {ptr = p;}
-			map_iterator(node_ptr r, node_ptr p) {root = r; ptr = p;}
+			map_iterator(node_point p) {_ptr = p;}
+			map_iterator(node_point r, node_point p) {_root = r; _ptr = p;}
 			map_iterator &operator= (const map_iterator& cp) {
 				if (&cp == this)
 					return (*this);
-				this->_node = cp._node;
+				this->_ptr = cp._ptr;
 				return (*this);
 			}
 			~map_iterator() {}
 
-			map_iterator operator ++() { ptr = ptr->get_next(ptr); return (*this); }
+			map_iterator operator ++() { _ptr = _ptr->get_next(_ptr); return (*this); }
 
 			map_iterator operator ++(int) {
 				map_iterator tmp = *this;
@@ -139,17 +152,17 @@ namespace ft {
 			}
 
 			map_iterator operator --() { 
-				if (!ptr) {
-					ptr = root->get_last(root);
+				if (!_ptr) {
+					_ptr = _root->get_last(_root);
 					return (*this);
 				}
-				node_ptr tmp = root;
-				node_ptr prev = NULL;
-				while (tmp && tmp->get_val() != ptr->get_val()) {
+				node_point tmp = _root;
+				node_point prev = NULL;
+				while (tmp && tmp->get_val() != _ptr->get_val()) {
 					prev = tmp;
 					tmp = tmp->get_next(tmp);
 				}
-				ptr = prev;
+				_ptr = prev;
 				return (*this);
 			}
 
@@ -162,24 +175,110 @@ namespace ft {
 
 			map_iterator operator =(value_type val)
 			{
-				ptr->set_val(val);
+				_ptr->set_val(val);
 				return this;
 			}
 
-			bool operator ==(map_iterator const& b) const { return (ptr == b.ptr); }
-			bool operator !=(map_iterator const& b) const { return (ptr != b.ptr); }
+			bool operator ==(map_iterator const& b) const { return (_ptr == b._ptr); }
+			bool operator !=(map_iterator const& b) const { return (_ptr != b._ptr); }
 
-			reference operator *() { return ptr->get_pair(); }
-			const_reference operator *() const { return ptr->get_pair(); }
-			//pointer operator ->() { return ((ptr->get_pair())); }
-			pointer operator ->() { pointer tmp = &ptr->get_pair(); return (tmp); }
+			reference operator *() { return _ptr->get_pair(); }
+			const_reference operator *() const { return _ptr->get_pair(); }
+			pointer operator ->() { return (&(_ptr->get_pair())); }
+			const_pointer operator ->() const { return (&(_ptr->get_pair())); }
 
-			node_ptr get_ptr() { return ptr; };
+			node_point get__ptr() { return _ptr; };
 
 
 		private :
-			node_ptr root;
-			node_ptr ptr;
+			node_point _root;
+			node_point _ptr;
+	};
+
+
+	template < class iterator >
+	class map_reverse_iterator {
+		public :
+			typedef typename iterator::mapped_type 		mapped_type;
+			typedef typename iterator::value_type		value_type;
+			typedef typename iterator::size_type		size_type;
+			typedef typename iterator::difference_type	difference_type;
+			typedef typename iterator::node				node;
+			typedef typename iterator::node_point			node_point;
+			typedef typename iterator::pointer			pointer;
+			typedef typename iterator::const_pointer	const_pointer;
+			typedef typename iterator::reference		reference;
+			typedef typename iterator::const_reference	const_reference;
+
+			map_reverse_iterator() {}
+			map_reverse_iterator(node_point p) {_ptr = p;}
+			map_reverse_iterator(node_point r, node_point p) {_root = r; _ptr = p;}
+			map_reverse_iterator(node_point r, node_point p, node_point f) {_root = r; _ptr = p;; _first = f;}
+			map_reverse_iterator &operator= (const map_reverse_iterator& cp) {
+				if (&cp == this)
+					return (*this);
+				this->_ptr = cp._ptr;
+				return (*this);
+			}
+			~map_reverse_iterator() {}
+
+			map_reverse_iterator operator --() { _ptr = _ptr->get_next(_ptr); return (*this); }
+
+			map_reverse_iterator operator ++(int) {
+				map_reverse_iterator tmp = *this;
+				++(*this);
+				return (tmp);
+			}
+
+			map_reverse_iterator operator ++() { 
+				if (!_ptr) {
+					_ptr = _ptr->get_last(_root);
+					return (*this);
+				}
+				if (_ptr == _first) {
+					_ptr = NULL;
+					return (*this);
+				}
+				if (_ptr == _root->get_first(_root)) {
+					_ptr = _first;
+					return (*this);
+				}
+				node_point tmp = _root->get_first(_root);
+				node_point prev = _first;
+				while (tmp && tmp->get_key() != _ptr->get_key()) {
+					prev = tmp;
+					tmp = tmp->get_next(tmp);
+				}
+				_ptr = prev;
+				return (*this);
+			}
+
+			map_reverse_iterator operator --(int)
+			{
+				map_reverse_iterator tmp = *this;
+				--(*this);
+				return (tmp);
+			}
+
+			map_reverse_iterator operator =(value_type val)
+			{
+				_ptr->set_val(val);
+				return this;
+			}
+
+			bool operator ==(map_reverse_iterator const& b) const { return (_ptr == b._ptr); }
+			bool operator !=(map_reverse_iterator const& b) const { return (_ptr != b._ptr); }
+
+			reference operator *() { return _ptr->get_pair(); }
+			const_reference operator *() const { return _ptr->get_pair(); }
+			pointer operator ->() { return (&(_ptr->get_pair())); }
+			const_pointer operator ->() const { return (&(_ptr->get_pair())); }
+
+
+		private :
+			node_point _first;
+			node_point _root;
+			node_point _ptr;
 	};
 
 
@@ -191,27 +290,28 @@ namespace ft {
 		
 		public :
 			
-			typedef Key														key_type;
-			typedef T														mapped_type;
-			typedef std::pair<const Key, T>									value_type;
-			typedef Compare													key_compare;
-			typedef Alloc													allocator_type;
-			typedef typename std::size_t 									size_type;
-			typedef typename std::ptrdiff_t 								difference_type;
-			typedef typename Alloc::const_reference							const_reference;
-			typedef typename Alloc::pointer									pointer;
-			typedef typename Alloc::const_pointer							const_pointer;
-			typedef typename ft::map_iterator<key_type, mapped_type>		iterator;
-			//typedef typename ft::map_const_iterator<T>						const_iterator;
-			//typedef typename ft::map_reverse_iterator<iterator>				reverse_iterator;
+			typedef Key																key_type;
+			typedef T																mapped_type;
+			typedef std::pair<const Key, T>											value_type;
+			typedef Compare															key_compare;
+			typedef Alloc															allocator_type;
+			typedef typename std::size_t 											size_type;
+			typedef typename std::ptrdiff_t 										difference_type;
+			typedef typename Alloc::const_reference									const_reference;
+			typedef typename Alloc::pointer											pointer;
+			typedef typename Alloc::const_pointer									const_pointer;
+			typedef typename ft::map_iterator<key_type, mapped_type>				iterator;
+			//typedef typename ft::map_const_iterator<key_type, mapped_type>			const_iterator;
+			typedef typename ft::map_reverse_iterator<iterator>						reverse_iterator;
 			//typedef typename ft::map_const_reverse_iterator<iterator>		const_reverse_iterator;
 
 			//typedef Compare												value_compare;
 
 			typedef map_node<Key, T>										node;
-			typedef node*													node_ptr;
+			typedef node*													node_point;
 
 			explicit map (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) {
+				_first = new node(true);
 				_node = NULL;
 				_comp = comp;
 				_alloc = alloc;
@@ -222,7 +322,15 @@ namespace ft {
 
 			iterator begin() { return _node ? iterator(_node, _get_first(_node)) : iterator(_node, NULL); }
 
+			//const_iterator begin() const { return _node ? const_iterator(_node, _get_first(_node)) : const_iterator(_node, NULL); }
+
 			iterator end() { return iterator(_node, NULL); }
+
+			//const_iterator end() const { return const_iterator(_node, NULL); }
+
+			reverse_iterator rbegin() { return reverse_iterator(_node, _get_last(), _first); }
+
+			reverse_iterator rend() { return reverse_iterator(_node, _first, _first); }
 
 			// CAPACITY
 
@@ -235,29 +343,36 @@ namespace ft {
 			// MODIFIERS
 
 			//std::pair<iterator,bool> insert (const value_type& val) {
-			std::pair<node_ptr,bool> insert (const value_type& val) {
+			std::pair<node_point,bool> insert (const value_type& val) {
 				if (!_node) {
 					_node = new node(val);
 					_size++;
+					_first->set_top(_node);
+					_node->set_left(_first);
 					//return std::pair<iterator,bool>(iterator(_node), true);
-					return std::pair<node_ptr,bool>(_node, true);
+					return std::pair<node_point,bool>(_node, true);
 				}
-				std::pair<bool, node_ptr> p = _search_node(_node, val.first);
+				std::pair<bool, node_point> p = _search_node(_node, val.first);
 				bool already_exist = p.first;
-				node_ptr tmp = p.second;
+				node_point tmp = p.second;
 				if (already_exist)
-					return std::pair<node_ptr,bool>(tmp, false);
-				node_ptr new_node = new node(val, tmp);
-				if (_comp(val.first, tmp->get_key()))
+					return std::pair<node_point,bool>(tmp, false);
+				node_point new_node = new node(val, tmp);
+				if (_comp(val.first, tmp->get_key())) {
 					tmp->set_left(new_node);
+					if (new_node == _get_first(_node)) {
+						_first->set_top(new_node);
+						new_node->set_left(_first);
+					}
+				}
 				else
 					tmp->set_right(new_node);
 				_size++;
-				return std::pair<node_ptr,bool>(new_node, true);
+				return std::pair<node_point,bool>(new_node, true);
 			}
 
 			void		iterate() {
-				node_ptr n = _get_first(_node);
+				node_point n = _get_first(_node);
 				while (n) {
 					std::cout << n->get_val() << std::endl;
 					n = _get_next(n);
@@ -267,7 +382,15 @@ namespace ft {
 			T get_key() {return _node->get_key();}
 			T get_val() {return _node->get_val();}
 
-			node_ptr		_node;
+			node_point		_first;
+			node_point		_node;
+
+			node_point	_get_first(node_point root) {
+				if (!root)
+					return NULL;
+				return _get_left_most(root);
+			}
+
 
 		private :
 
@@ -275,29 +398,23 @@ namespace ft {
 			allocator_type	_alloc;
 			size_t			_size;
 
-			std::pair<bool, node_ptr> _search_node(node_ptr tmp, key_type key) {
+			std::pair<bool, node_point> _search_node(node_point tmp, key_type key) {
 				if (tmp->get_key() == key)
-					return std::pair<bool, node_ptr>(true, tmp);
-				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || (!tmp->get_left() && _comp(key, tmp->get_key())))
-					return std::pair<bool, node_ptr>(false, tmp);
+					return std::pair<bool, node_point>(true, tmp);
+				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || (tmp->get_left() == _first && _comp(key, tmp->get_key())))
+					return std::pair<bool, node_point>(false, tmp);
 				if (_comp(tmp->get_key(), key))
 					return _search_node(tmp->get_right(), key);
 				return _search_node(tmp->get_left(), key);
 			}
 
-			node_ptr	_get_left_most(node_ptr root) {
-				while (root->get_left())
+			node_point	_get_left_most(node_point root) {
+				while (root->get_left() && root->get_left() != _first)
 					root = root->get_left();
 				return root;
 			}
 
-			node_ptr	_get_first(node_ptr root) {
-				if (!root)
-					return NULL;
-				return _get_left_most(root);
-			}
-
-			node_ptr	_get_next(node_ptr root) {
+			node_point	_get_next(node_point root) {
 				if (root->get_right())
 					return _get_left_most(root->get_right());
 				else {
@@ -307,9 +424,9 @@ namespace ft {
 				}
 			}
 
-			node_ptr	_get_last() {
-				node_ptr n = _get_first(_node);
-				node_ptr prev = NULL;
+			node_point	_get_last() {
+				node_point n = _get_first(_node);
+				node_point prev = NULL;
 
 				while (n) {
 					prev = n;
