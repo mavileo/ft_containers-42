@@ -466,10 +466,8 @@ namespace ft {
 			typedef typename ft::map_reverse_iterator<iterator>						reverse_iterator;
 			typedef typename ft::map_const_reverse_iterator<iterator>				const_reverse_iterator;
 
-			//typedef Compare												value_compare;
-
-			typedef map_node<Key, T>										node;
-			typedef node*													node_point;
+			typedef map_node<Key, T>												node;
+			typedef node*															node_point;
 
 			explicit map (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) {
 				_first = new node(true);
@@ -663,6 +661,135 @@ namespace ft {
 				_size = _size_tmp;
 			}
 
+			void clear() {
+				erase(begin(), end());
+			}
+
+
+			// OBSERVERS
+
+			key_compare key_comp() const { return _comp; }
+
+			class	value_compare
+			{
+			public:
+				typedef bool result_type;
+				typedef value_type first_argument_type;
+				typedef value_type second_argument_type;
+
+				Compare comp;
+
+				value_compare(Compare c) : comp(c) {};
+				virtual ~value_compare() {};
+
+				bool operator() (const value_type& x, const value_type& y) const
+				{
+					return (comp(x.first, y.first));
+				}
+
+			};
+
+			value_compare value_comp() const { return (value_compare(Compare())); }
+
+
+			// OPERATIONS
+
+			iterator find (const key_type& k) {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+
+				return (!p.first) ? end() : iterator(p.second);
+			}
+
+			const_iterator find (const key_type& k) const {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+
+				return (!p.first) ? end() : iterator(p.second);
+			}
+
+			size_type count (const key_type& k) const {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+
+				return (!p.first) ? 0 : 1;
+			}
+
+			iterator lower_bound (const key_type& k) {
+				iterator it = begin();
+				std::pair<key_type, mapped_type> tmp = *it;
+				key_type key = tmp.first;
+
+				while (it != end()) {
+					tmp = *it;
+					key = tmp.first;
+					if (!_comp(key, k))
+						return it;
+					it++;
+				}
+				return end();
+			}
+
+			const_iterator lower_bound (const key_type& k) const {
+				iterator it = begin();
+				std::pair<key_type, mapped_type> tmp = *it;
+				key_type key = tmp.first;
+
+				while (it != end()) {
+					tmp = *it;
+					key = tmp.first;
+					if (!_comp(key, k))
+						return it;
+					it++;
+				}
+				return end();
+			}
+
+			iterator upper_bound (const key_type& k) {
+				iterator it = begin();
+				std::pair<key_type, mapped_type> tmp = *it;
+				key_type key = tmp.first;
+
+				while (it != end()) {
+					tmp = *it;
+					key = tmp.first;
+					if (_comp(k, key))
+						return it;
+					it++;
+				}
+				return end();
+			}
+
+			const_iterator upper_bound (const key_type& k) const {
+				iterator it = begin();
+				std::pair<key_type, mapped_type> tmp = *it;
+				key_type key = tmp.first;
+
+				while (it != end()) {
+					tmp = *it;
+					key = tmp.first;
+					if (_comp(k, key))
+						return it;
+					it++;
+				}
+				return end();
+			}
+
+			std::pair<iterator,iterator>             equal_range (const key_type& k) {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+				std::pair<iterator,iterator> res;
+
+				if (p.first)
+					return std::pair<iterator,iterator>(iterator(p.second), iterator(p.second));
+				return std::pair<iterator,iterator>(lower_bound(k), upper_bound(k));
+			}
+
+			std::pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+				std::pair<iterator,iterator> res;
+
+				if (p.first)
+					return std::pair<iterator,iterator>(iterator(p.second), iterator(p.second));
+				return std::pair<iterator,iterator>(lower_bound(k), upper_bound(k));
+			}
+
 		private :
 
 			node_point		_first;
@@ -672,6 +799,16 @@ namespace ft {
 			size_t			_size;
 
 			std::pair<bool, node_point> _search_node(node_point tmp, key_type key) {
+				if (tmp->get_key() == key)
+					return std::pair<bool, node_point>(true, tmp);
+				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || ((!tmp->get_left() || tmp->get_left() == _first) && _comp(key, tmp->get_key())))
+					return std::pair<bool, node_point>(false, tmp);
+				if (_comp(tmp->get_key(), key))
+					return _search_node(tmp->get_right(), key);
+				return _search_node(tmp->get_left(), key);
+			}
+
+			const std::pair<bool, node_point> _search_node(node_point tmp, key_type key) const {
 				if (tmp->get_key() == key)
 					return std::pair<bool, node_point>(true, tmp);
 				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || ((!tmp->get_left() || tmp->get_left() == _first) && _comp(key, tmp->get_key())))
