@@ -620,7 +620,6 @@ namespace ft {
 				while (first != last) {
 					insert(*first);
 					first++;
-					_size++;
 				}
 			}
 

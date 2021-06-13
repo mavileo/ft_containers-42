@@ -389,7 +389,7 @@ namespace ft {
 			}
 
 			// CAPACITY
-			bool empty() {
+			bool empty() const {
 				if (_size)
 					return false;
 				return true;

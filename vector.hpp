@@ -285,7 +285,7 @@ namespace ft {
 				_size = 0;
 				_size_alloc = 0;
 				while (first != last) {
-					this->push_back(*first);
+					push_back(*first);
 					first++;
 				}
 			}
@@ -293,11 +293,10 @@ namespace ft {
 			explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type()) {
 				_alloc = alloc;
 				_ptr = NULL;
-				_size = n;
-				_size_alloc = n;
-				reserve(n);
-				for (size_type i = 0; i < n; i++)
-					_alloc.construct(_ptr + i, val);
+				_size = 0;
+				_size_alloc = 0;
+				while (n--)
+					push_back(val);
 			}
 
 			vector (const vector& x) { *this = x; }
