@@ -643,6 +643,26 @@ namespace ft {
 					erase(first++);
 			}
 
+			void swap (map& x) {
+				node_point		_first_tmp = x._first;
+				node_point		_node_tmp = x._node;
+				key_compare		_comp_tmp = x._comp;
+				allocator_type	_alloc_tmp = x._alloc;
+				size_t			_size_tmp = x._size;
+
+				x._first = _first;
+				x._node = _node;
+				x._comp = _comp;
+				x._alloc = _alloc;
+				x._size = _size;
+
+				_first = _first_tmp;
+				_node = _node_tmp;
+				_comp = _comp_tmp;
+				_alloc = _alloc_tmp;
+				_size = _size_tmp;
+			}
+
 		private :
 
 			node_point		_first;
