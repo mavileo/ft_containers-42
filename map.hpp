@@ -477,6 +477,37 @@ namespace ft {
 				_size = 0;
 			}
 
+			template <class InputIterator>
+			map (InputIterator first, InputIterator last,
+			const key_compare& comp = key_compare(),
+			const allocator_type& alloc = allocator_type()) {
+				_first = new node(true);
+				_node = NULL;
+				_comp = comp;
+				_alloc = alloc;
+				_size = 0;
+
+				insert(first, last);
+			}
+
+			map (const map& x) {
+				_first = new node(true);
+				_node = NULL;
+				_comp = x.key_comp();
+				_size = 0;
+
+				insert(x.begin(), x.end());
+			}
+
+			~map() {
+				clear();
+				delete _first;
+			}
+
+			map& operator= (const map& x) {
+				insert(x.begin(), x.end());
+			}
+
 			// ITERATORS
 
 			iterator begin() { return _node ? iterator(_node, _get_first(_node)) : iterator(_node, NULL); }

@@ -74,7 +74,7 @@ namespace ft {
 			list_iterator &operator= (const list_iterator& cp) {
 				if (&cp == this)
 					return (*this);
-				this->_node = cp._node;
+				this->ptr = cp.ptr;
 				return (*this);
 			}
 			~list_iterator() {}
@@ -100,7 +100,7 @@ namespace ft {
 			list_iterator operator =(value_type val)
 			{
 				ptr->set_value(val);
-				return this;
+				return *this;
 			}
 
 			bool operator ==(list_iterator const& b) const { return (ptr == b.ptr); }
@@ -132,7 +132,7 @@ namespace ft {
 			{
 				if (&cp == this)
 					return (*this);
-				this->_node = cp._node;
+				ptr = cp.ptr;
 				return (*this);
 			}
 			~list_const_iterator() {}
@@ -370,7 +370,7 @@ namespace ft {
 				return (_last->get_prev()) ? const_iterator(_node) : const_iterator(_last);
 			}
 			reverse_iterator rbegin() {
-				return (_last->get_prev()) ? reverse_iterator(_last->get_prev()) : iterator(_last);
+				return (_last->get_prev()) ? reverse_iterator(_last->get_prev()) : reverse_iterator(_last);
 			}
 			const_reverse_iterator rbegin() const { 
 				return (_last->get_prev()) ? const_reverse_iterator(_node) : const_reverse_iterator(_last);
