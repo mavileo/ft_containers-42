@@ -26,13 +26,16 @@ int main() {
 		std::cout << (it)->second << std::endl;
 		it++;}
 
- 	ft::map<std::string, int> map2;
+ 	it--;
+ 	it--;
+ 	it--;
+	map.erase(map.begin(), it);
 
-	map2.insert(map.begin(), map.end());
+	std::cout << std::endl;
 
-	ft::map<std::string, int>::iterator it2 = map2.begin();
+	ft::map<std::string, int>::iterator it2 = map.begin();
 
-	while (it2 != map2.end()){
+	while (it2 != map.end()){
 		std::cout << (it2)->second << std::endl;
 		it2++;}
 

@@ -595,6 +595,54 @@ namespace ft {
 				}
 			}
 
+			void erase (iterator position) {
+				std::pair<key_type, mapped_type> jj = *position;
+				key_type key = jj.first;
+
+				std::pair<bool, node_point> p = _search_node(_node, key);
+				if (!p.first)
+					return ;
+				
+				node_point tmp = p.second;
+				if (tmp->get_top()) {
+					if (tmp->get_top()->get_left() == tmp)
+						tmp->get_top()->set_left(tmp->get_left());
+					if (tmp->get_top()->get_right() == tmp)
+						tmp->get_top()->set_right(tmp->get_right());
+				}
+				if (tmp->get_left())
+					tmp->get_left()->set_top(tmp->get_top());
+				if (tmp->get_right())
+					tmp->get_right()->set_top(tmp->get_top());
+				if (tmp == _node) {
+					if (tmp->get_left() && tmp->get_left() != _first) {
+						_node = tmp->get_left();
+						tmp->get_left()->set_right(tmp->get_right());
+					}
+					else if (tmp->get_right()) {
+						_node = tmp->get_right();
+						tmp->get_right()->set_left(tmp->get_left());
+					}
+					else
+						_node = NULL;
+				}
+				delete tmp;
+				_size--;
+			}
+
+			size_type erase (const key_type& k) {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+				if (!p.first)
+					return 0;
+				erase(iterator(p.second));
+				return 1;
+			}
+
+			void erase (iterator first, iterator last) {
+				while (first != last)
+					erase(first++);
+			}
+
 		private :
 
 			node_point		_first;
