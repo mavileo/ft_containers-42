@@ -38,9 +38,9 @@ int main() {
 
 	while (it != map.end())
 		std::cout << (it++)->second << std::endl;
-/* 
+
 	it--;
 	it--;
 	std::cout << (it)->second << std::endl;
- */
+
 }

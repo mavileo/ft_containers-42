@@ -85,6 +85,17 @@ namespace ft {
 				}
 			}
 
+			node_ptr	get_last(node_ptr root) {
+				node_ptr n = get_first(root);
+				node_ptr prev = NULL;
+
+				while (n) {
+					prev = n;
+					n = get_next(n);
+				}
+				return prev;
+			}
+
 
 		private:
 
@@ -128,6 +139,10 @@ namespace ft {
 			}
 
 			map_iterator operator --() { 
+				if (!ptr) {
+					ptr = root->get_last(root);
+					return (*this);
+				}
 				node_ptr tmp = root;
 				node_ptr prev = NULL;
 				while (tmp && tmp->get_val() != ptr->get_val()) {
@@ -201,12 +216,11 @@ namespace ft {
 				_comp = comp;
 				_alloc = alloc;
 				_size = 0;
-				_last = new node;
 			}
 
 			// ITERATORS
 
-			iterator begin() { return iterator(_node, _get_first(_node)); }
+			iterator begin() { return _node ? iterator(_node, _get_first(_node)) : iterator(_node, NULL); }
 
 			iterator end() { return iterator(_node, NULL); }
 
@@ -260,7 +274,6 @@ namespace ft {
 			key_compare		_comp;
 			allocator_type	_alloc;
 			size_t			_size;
-			node_ptr		_last;
 
 			std::pair<bool, node_ptr> _search_node(node_ptr tmp, key_type key) {
 				if (tmp->get_key() == key)
@@ -296,9 +309,13 @@ namespace ft {
 
 			node_ptr	_get_last() {
 				node_ptr n = _get_first(_node);
-				while (n)
+				node_ptr prev = NULL;
+
+				while (n) {
+					prev = n;
 					n = _get_next(n);
-				return n;
+				}
+				return prev;
 			}
 
 	};
