@@ -508,6 +508,26 @@ namespace ft {
 
 			// ELEMENT ACCESS
 
+			mapped_type& operator[] (const key_type& k) {
+				std::pair<bool, node_point> p = _search_node(_node, k);
+				node_point tmp = p.second;
+
+				if (p.first)
+					return tmp->get_val();
+				node_point new_node = new node;
+				if (_comp(k, tmp->get_key())) {
+					tmp->set_left(new_node);
+					if (new_node == _get_first(_node)) {
+						_first->set_top(new_node);
+						new_node->set_left(_first);
+					}
+				}
+				else
+					tmp->set_right(new_node);
+				_size++;
+				return new_node->get_val();
+			}
+
 
 			// MODIFIERS
 
@@ -563,7 +583,7 @@ namespace ft {
 			std::pair<bool, node_point> _search_node(node_point tmp, key_type key) {
 				if (tmp->get_key() == key)
 					return std::pair<bool, node_point>(true, tmp);
-				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || (tmp->get_left() == _first && _comp(key, tmp->get_key())))
+				if ((!tmp->get_right() && _comp(tmp->get_key(), key)) || ((!tmp->get_left() || tmp->get_left() == _first) && _comp(key, tmp->get_key())))
 					return std::pair<bool, node_point>(false, tmp);
 				if (_comp(tmp->get_key(), key))
 					return _search_node(tmp->get_right(), key);

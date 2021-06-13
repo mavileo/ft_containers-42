@@ -20,16 +20,17 @@ int main() {
 	map.insert(std::pair<std::string, int>("a", 1));
 	map.insert(std::pair<std::string, int>("zfhrstj", 6));
 
-	ft::map<std::string, int>::const_reverse_iterator it = map.rbegin();
+	ft::map<std::string, int>::iterator it = map.begin();
 
-	while (it != map.rend()){
+	while (it != map.end()){
 		std::cout << (it)->second << std::endl;
 		it++;}
 
 	std::cout << std::endl;
+	std::cout << map.size() << std::endl;
 
-	it--;
-	it--;
-	std::cout << (it)->second << std::endl;
+	std::cout << map["a"] << std::endl;
+
+	std::cout << map.size() << std::endl;
 
 }
