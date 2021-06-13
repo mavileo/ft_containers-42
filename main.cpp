@@ -26,11 +26,15 @@ int main() {
 		std::cout << (it)->second << std::endl;
 		it++;}
 
-	std::cout << std::endl;
-	std::cout << map.size() << std::endl;
+ 	ft::map<std::string, int> map2;
 
-	std::cout << map["a"] << std::endl;
+	map2.insert(map.begin(), map.end());
 
-	std::cout << map.size() << std::endl;
+	ft::map<std::string, int>::iterator it2 = map2.begin();
+
+	while (it2 != map2.end()){
+		std::cout << (it2)->second << std::endl;
+		it2++;}
+
 
 }

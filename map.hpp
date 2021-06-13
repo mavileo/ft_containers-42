@@ -531,21 +531,19 @@ namespace ft {
 
 			// MODIFIERS
 
-			//std::pair<iterator,bool> insert (const value_type& val) {
-			std::pair<node_point,bool> insert (const value_type& val) {
+			std::pair<iterator,bool> insert (const value_type& val) {
 				if (!_node) {
 					_node = new node(val);
 					_size++;
 					_first->set_top(_node);
 					_node->set_left(_first);
-					//return std::pair<iterator,bool>(iterator(_node), true);
-					return std::pair<node_point,bool>(_node, true);
+					return std::pair<iterator,bool>(iterator(_node), true);
 				}
 				std::pair<bool, node_point> p = _search_node(_node, val.first);
 				bool already_exist = p.first;
 				node_point tmp = p.second;
 				if (already_exist)
-					return std::pair<node_point,bool>(tmp, false);
+					return std::pair<iterator,bool>(iterator(tmp), false);
 				node_point new_node = new node(val, tmp);
 				if (_comp(val.first, tmp->get_key())) {
 					tmp->set_left(new_node);
@@ -557,25 +555,49 @@ namespace ft {
 				else
 					tmp->set_right(new_node);
 				_size++;
-				return std::pair<node_point,bool>(new_node, true);
+				return std::pair<iterator,bool>(iterator(new_node), true);
 			}
 
-			void		iterate() {
-				node_point n = _get_first(_node);
-				while (n) {
-					std::cout << n->get_val() << std::endl;
-					n = _get_next(n);
+			iterator insert (iterator position, const value_type& val) {
+				(void)position;
+				if (!_node) {
+					_node = new node(val);
+					_size++;
+					_first->set_top(_node);
+					_node->set_left(_first);
+					return iterator(_node);
+				}
+				std::pair<bool, node_point> p = _search_node(_node, val.first);
+				bool already_exist = p.first;
+				node_point tmp = p.second;
+				if (already_exist)
+					return iterator(tmp);
+				node_point new_node = new node(val, tmp);
+				if (_comp(val.first, tmp->get_key())) {
+					tmp->set_left(new_node);
+					if (new_node == _get_first(_node)) {
+						_first->set_top(new_node);
+						new_node->set_left(_first);
+					}
+				}
+				else
+					tmp->set_right(new_node);
+				_size++;
+				return iterator(new_node);
+			}
+
+			template <class InputIterator>
+			void insert (InputIterator first, InputIterator last) {
+				while (first != last) {
+					insert(*first);
+					first++;
 				}
 			}
 
-			T get_key() {return _node->get_key();}
-			T get_val() {return _node->get_val();}
+		private :
 
 			node_point		_first;
 			node_point		_node;
-
-		private :
-
 			key_compare		_comp;
 			allocator_type	_alloc;
 			size_t			_size;
